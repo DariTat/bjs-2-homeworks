@@ -1,39 +1,33 @@
 class AlarmClock{
     constructor(){
         this.alarmCollection = [];
-        this.timeId;
+        this.timeId = null;
     }  
-   
     addClock(time, callback, id){
-        this.time = time;
-        this.callback = callback;
-        this.id = id;
-        if(this.id === undefined){
+        if(!id){
             throw new Error('error text');
         }
         if(this.alarmCollection.find(item => item.id === id)){
             console.error('Звонок с таким id существует');
             return false;
         }
-        this.alarmCollection.push({time: this.time, callback: this.callback, id: this.id});
+        this.alarmCollection.push({time, callback, id});
     }
     removeClock(id){
-        if(this.alarmCollection.filter(item => item.id === id)){
-            let index = this.alarmCollection.findIndex(item => item.id === id);
-            if (this.alarmCollection.splice(index, 1)){
-                return true;
-            }else{
-                return false;
-            }
+        let len = this.alarmCollection.length;
+        this.alarmCollection = this.alarmCollection.filter(item => item.id !== id);
+        if(len !== this.alarmCollection.length){
+            console.log("Звонок удален");
+            return true;
+        }else {
+            return false;
         }
     }
     getCurrentFormattedTime(){
-        let now = new Date();
-        let hours = now.getHours();
-        let minutes = now.getMinutes();
-        if(minutes < 10){minutes = '0'+ minutes;}
-        if(hours < 10){hours = '0'+ hours};
-        let timeNow = hours + ':' + minutes;
+        let timeNow = new Date().toLocaleTimeString("ru-Ru", {
+            hour: "2-digit",
+            minute: "2-digit",
+            });
         return timeNow;
     }
     start(){
@@ -43,21 +37,21 @@ class AlarmClock{
             }
         }
         const checkClockBind = checkClock.bind(this);
-        if (this.timeId === undefined){
+        if (this.timeId === null){
             this.timeId = setInterval(() => this.alarmCollection.forEach(call => checkClockBind(call)), 2000);
         }
     }
     stop(){
-        if(this.timeId !== undefined){
+        if(this.timeId !== null){
             clearInterval(this.timeId);
-            delete this.timeId;
+            this.timeId = null;
         }
     }
     printAlarms(){
         this.alarmCollection.forEach(item => console.log("Будильник № " + item.id + " заведён на " + item.time));
     }
     clearAlarms(){
-        clearInterval(this.timeId);
-        this.alarmCollection.length = 0;
+        this.stop();
+        this.alarmCollection = [];
     }
 }
